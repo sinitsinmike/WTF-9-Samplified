@@ -1,0 +1,6 @@
+
+[RED] [BLUE]
+[GREEN] [YELLOW]
+
+[SHIFT] [TAP]
+[REC]   [PLAY]
