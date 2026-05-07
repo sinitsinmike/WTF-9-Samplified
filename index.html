@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Samplified Sample Tool</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1f2430;
+      --text: #eef2f7;
+      --muted: #aeb7c6;
+      --accent: #6ea8fe;
+      --accent-2: #8ef0c9;
+      --danger: #ff8d8d;
+      --border: #2b3240;
+      --good: #84f7b2;
+      --shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #0d1016 0%, #11151d 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      color: var(--muted);
+      max-width: 860px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: rgba(23, 26, 33, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 18px 18px 0 18px;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 760px) {
+      .controls { grid-template-columns: 1fr; }
+    }
+
+    .field {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .field input[type="range"],
+    .field input[type="number"],
+    .field select {
+      width: 100%;
+    }
+
+    input[type="number"], select {
+      border: 1px solid var(--border);
+      background: #10141d;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+
+    .sample-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .sample-card {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(31,36,48,.95), rgba(20,24,31,.95));
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .sample-top {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .sample-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: #111620;
+      color: var(--muted);
+    }
+
+    .dropzone {
+      position: relative;
+      border: 1px dashed #4c5b75;
+      border-radius: 14px;
+      background: rgba(16,20,29,.7);
+      min-height: 100px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      padding: 16px;
+      transition: .18s ease;
+      cursor: pointer;
+    }
+
+    .dropzone.drag {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+      color: var(--text);
+    }
+
+    .dropzone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    canvas {
+      width: 100%;
+      height: 74px;
+      background: #0c1017;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: block;
+      margin-top: 10px;
+    }
+
+    .sample-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: #151a25;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: .15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button.primary {
+      background: linear-gradient(180deg, #6ea8fe, #4f85d9);
+      color: #08111d;
+      border: none;
+    }
+    button.good {
+      background: linear-gradient(180deg, #88efc3, #5fd4a3);
+      color: #072114;
+      border: none;
+    }
+    button.danger {
+      background: #2c1317;
+      color: #ffb3b3;
+      border-color: #60323a;
+    }
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .stats {
+      display: grid;
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+    }
+
+    .stat .k {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat .v {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #d7e0ef;
+      background: #0d1118;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      max-height: 320px;
+      overflow: auto;
+    }
+
+    .muted { color: var(--muted); }
+    .ok { color: var(--good); }
+    .warn { color: #ffd58a; }
+    .err { color: var(--danger); }
+    .small { font-size: 12px; }
+    .footer-note { margin-top: 10px; color: var(--muted); line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Samplified Sample Tool</h1>
+      <div class="sub">
+        Одностраничная браузерная утилита для подготовки WAV-файлов под прошивку Samplified / Bleep Drum: загрузка, downsample, mono, trim, normalize, preview и экспорт готового <code>samples.h</code>.
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Сэмплы</h2>
+          <div class="badge">4 основных звука: kick / snare / hat / bass</div>
+        </div>
+        <div class="panel-body">
+          <div class="controls">
+            <div class="field">
+              <label>
+                <span>Частота дискретизации</span>
+                <strong id="sampleRateLabel">9800 Hz</strong>
+              </label>
+              <input id="targetRate" type="range" min="4000" max="20000" step="100" value="9800" />
+            </div>
+
+            <div class="field">
+              <label>
+                <span>Trim тишины</span>
+                <strong id="trimLabel">1.5%</strong>
+              </label>
+              <input id="trimThreshold" type="range" min="0" max="10" step="0.1" value="1.5" />
+            </div>
+
+            <div class="field">
+              <label>
+                <span>Fade out</span>
+                <strong id="fadeLabel">8 ms</strong>
+              </label>
+              <input id="fadeMs" type="range" min="0" max="80" step="1" value="8" />
+            </div>
+
+            <div class="field">
+              <label>
+                <span>Normalize</span>
+                <strong id="normalizeLabel">Вкл.</strong>
+              </label>
+              <select id="normalizeMode">
+                <option value="on" selected>Вкл.</option>
+                <option value="off">Выкл.</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sample-list" id="sampleList"></div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-head">
+          <h2>Экспорт</h2>
+          <div class="badge">Готовый <code>samples.h</code></div>
+        </div>
+        <div class="panel-body">
+          <div class="stats">
+            <div class="stat">
+              <div class="k">Всего байт в массивах</div>
+              <div class="v" id="totalBytes">0</div>
+            </div>
+            <div class="stat">
+              <div class="k">Сэмплы загружены</div>
+              <div class="v" id="loadedCount">0 / 4</div>
+            </div>
+            <div class="stat">
+              <div class="k">Примерный размер flash только под таблицы</div>
+              <div class="v" id="flashEstimate">0 B</div>
+            </div>
+          </div>
+
+          <div class="sample-actions" style="margin-top:16px;">
+            <button id="generateBtn" class="primary" disabled>Сгенерировать samples.h</button>
+            <button id="downloadBtn" class="good" disabled>Скачать samples.h</button>
+            <button id="copyBtn" disabled>Копировать</button>
+            <button id="loadDemoBtn">Загрузить демо sine</button>
+          </div>
+
+          <div class="footer-note small">
+            По умолчанию утилита генерирует: <code>kick_table</code>, <code>snare_table</code>, <code>tick_table</code>, <code>bass_table</code> и длины <code>kick_length</code>, <code>snare_length</code>, <code>tick_length</code>, <code>bass_length</code>. <code>sine_table</code> оставлен встроенным, чтобы не ломать служебный тон/клик в прошивке.
+          </div>
+
+          <div style="margin-top:16px;">
+            <pre id="output">// Здесь появится samples.h</pre>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const SAMPLE_DEFS = [
+      { id: 'kick', label: 'Kick', arrayName: 'kick_table', lengthName: 'kick_length', suggested: 'kick.wav' },
+      { id: 'snare', label: 'Snare', arrayName: 'snare_table', lengthName: 'snare_length', suggested: 'snare.wav' },
+      { id: 'hat', label: 'Hat / Tick', arrayName: 'tick_table', lengthName: 'tick_length', suggested: 'hat.wav' },
+      { id: 'bass', label: 'Bass', arrayName: 'bass_table', lengthName: 'bass_length', suggested: 'bass.wav' },
+    ];
+
+    const state = {
+      targetRate: 9800,
+      trimThreshold: 0.015,
+      fadeMs: 8,
+      normalize: true,
+      samples: Object.fromEntries(SAMPLE_DEFS.map(def => [def.id, null])),
+      outputText: '',
+      audioCtx: null,
+    };
+
+    const els = {
+      sampleList: document.getElementById('sampleList'),
+      targetRate: document.getElementById('targetRate'),
+      trimThreshold: document.getElementById('trimThreshold'),
+      fadeMs: document.getElementById('fadeMs'),
+      normalizeMode: document.getElementById('normalizeMode'),
+      sampleRateLabel: document.getElementById('sampleRateLabel'),
+      trimLabel: document.getElementById('trimLabel'),
+      fadeLabel: document.getElementById('fadeLabel'),
+      normalizeLabel: document.getElementById('normalizeLabel'),
+      totalBytes: document.getElementById('totalBytes'),
+      loadedCount: document.getElementById('loadedCount'),
+      flashEstimate: document.getElementById('flashEstimate'),
+      generateBtn: document.getElementById('generateBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      copyBtn: document.getElementById('copyBtn'),
+      output: document.getElementById('output'),
+      loadDemoBtn: document.getElementById('loadDemoBtn'),
+    };
+
+    function fmtBytes(n) {
+      if (n < 1024) return `${n} B`;
+      if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+      return `${(n / 1024 / 1024).toFixed(2)} MB`;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function createSampleCard(def) {
+      const card = document.createElement('div');
+      card.className = 'sample-card';
+      card.innerHTML = `
+        <div class="sample-top">
+          <div>
+            <div class="sample-name">${def.label}</div>
+            <div class="small muted">Ожидаемое имя: ${def.suggested}</div>
+          </div>
+          <div class="badge" id="badge-${def.id}">Не загружен</div>
+        </div>
+        <label class="dropzone" id="drop-${def.id}">
+          <div>
+            <div><strong>Перетащи WAV сюда</strong></div>
+            <div class="small muted" style="margin-top:6px;">или кликни для выбора файла</div>
+          </div>
+          <input type="file" accept=".wav,audio/wav" id="input-${def.id}" />
+        </label>
+        <canvas id="canvas-${def.id}" width="900" height="120"></canvas>
+        <div class="small muted" id="meta-${def.id}" style="margin-top:8px;">Нет данных</div>
+        <div class="sample-actions">
+          <button id="play-${def.id}" disabled>Preview</button>
+          <button id="reprocess-${def.id}" disabled>Пересчитать</button>
+          <button id="clear-${def.id}" class="danger" disabled>Очистить</button>
+        </div>
+      `;
+      els.sampleList.appendChild(card);
+
+      const input = card.querySelector(`#input-${def.id}`);
+      const drop = card.querySelector(`#drop-${def.id}`);
+      const canvas = card.querySelector(`#canvas-${def.id}`);
+      const playBtn = card.querySelector(`#play-${def.id}`);
+      const reprocessBtn = card.querySelector(`#reprocess-${def.id}`);
+      const clearBtn = card.querySelector(`#clear-${def.id}`);
+
+      input.addEventListener('change', (e) => {
+        if (e.target.files?.[0]) handleFile(def.id, e.target.files[0]);
+      });
+
+      ;['dragenter', 'dragover'].forEach(evt => drop.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        drop.classList.add('drag');
+      }));
+
+      ;['dragleave', 'drop'].forEach(evt => drop.addEventListener(evt, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        drop.classList.remove('drag');
+      }));
+
+      drop.addEventListener('drop', (e) => {
+        const f = e.dataTransfer?.files?.[0];
+        if (f) handleFile(def.id, f);
+      });
+
+      playBtn.addEventListener('click', () => previewSample(def.id));
+      reprocessBtn.addEventListener('click', () => reprocess(def.id));
+      clearBtn.addEventListener('click', () => clearSample(def.id));
+
+      drawPlaceholder(canvas, def.label);
+    }
+
+    function drawPlaceholder(canvas, label) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0c1017';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#273247';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+      ctx.fillStyle = '#73839b';
+      ctx.font = '16px sans-serif';
+      ctx.fillText(`${label}: waveform preview`, 16, 24);
+    }
+
+    function drawWaveform(canvas, data8) {
+      const ctx = canvas.getContext('2d');
+      const { width, height } = canvas;
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#0c1017';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.strokeStyle = '#273247';
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#8ef0c9';
+      ctx.lineWidth = 1.25;
+      ctx.beginPath();
+      const step = data8.length / width;
+      for (let x = 0; x < width; x++) {
+        const idx = Math.min(data8.length - 1, Math.floor(x * step));
+        const y = ((255 - data8[idx]) / 255) * (height - 12) + 6;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    async function getAudioContext() {
+      if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+      return state.audioCtx;
+    }
+
+    async function handleFile(id, file) {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const ctx = await getAudioContext();
+        const decoded = await ctx.decodeAudioData(arrayBuffer.slice(0));
+        const processed = processAudioBuffer(decoded, {
+          targetRate: state.targetRate,
+          trimThreshold: state.trimThreshold,
+          fadeMs: state.fadeMs,
+          normalize: state.normalize,
+        });
+        state.samples[id] = { file, decoded, processed };
+        updateSampleUI(id);
+        refreshSummary();
+      } catch (err) {
+        console.error(err);
+        alert(`Не удалось прочитать ${file.name}. Нужен валидный WAV.`);
+      }
+    }
+
+    function mixToMono(audioBuffer) {
+      const ch = audioBuffer.numberOfChannels;
+      const len = audioBuffer.length;
+      const mono = new Float32Array(len);
+      for (let c = 0; c < ch; c++) {
+        const data = audioBuffer.getChannelData(c);
+        for (let i = 0; i < len; i++) mono[i] += data[i] / ch;
+      }
+      return mono;
+    }
+
+    function resampleLinear(input, srcRate, dstRate) {
+      if (srcRate === dstRate) return input.slice();
+      const ratio = srcRate / dstRate;
+      const outLength = Math.max(1, Math.round(input.length / ratio));
+      const out = new Float32Array(outLength);
+      for (let i = 0; i < outLength; i++) {
+        const pos = i * ratio;
+        const left = Math.floor(pos);
+        const right = Math.min(input.length - 1, left + 1);
+        const frac = pos - left;
+        out[i] = input[left] * (1 - frac) + input[right] * frac;
+      }
+      return out;
+    }
+
+    function trimSilence(data, threshold) {
+      let start = 0;
+      let end = data.length - 1;
+      while (start < data.length && Math.abs(data[start]) < threshold) start++;
+      while (end > start && Math.abs(data[end]) < threshold) end--;
+      return data.slice(start, end + 1);
+    }
+
+    function applyFadeOut(data, sampleRate, fadeMs) {
+      const fadeSamples = Math.min(data.length, Math.round(sampleRate * (fadeMs / 1000)));
+      if (fadeSamples <= 1) return data;
+      const out = data.slice();
+      const start = out.length - fadeSamples;
+      for (let i = 0; i < fadeSamples; i++) {
+        const gain = 1 - i / (fadeSamples - 1);
+        out[start + i] *= gain;
+      }
+      return out;
+    }
+
+    function normalizeFloat(data) {
+      let peak = 0;
+      for (let i = 0; i < data.length; i++) peak = Math.max(peak, Math.abs(data[i]));
+      if (peak < 1e-9) return data.slice();
+      const out = new Float32Array(data.length);
+      const gain = 1 / peak;
+      for (let i = 0; i < data.length; i++) out[i] = clamp(data[i] * gain, -1, 1);
+      return out;
+    }
+
+    function floatToU8(data) {
+      const out = new Uint8Array(data.length);
+      for (let i = 0; i < data.length; i++) {
+        const v = clamp(data[i], -1, 1);
+        out[i] = Math.round((v * 127) + 127);
+      }
+      return out;
+    }
+
+    function processAudioBuffer(audioBuffer, options) {
+      let mono = mixToMono(audioBuffer);
+      let resampled = resampleLinear(mono, audioBuffer.sampleRate, options.targetRate);
+      resampled = trimSilence(resampled, options.trimThreshold);
+      if (options.normalize) resampled = normalizeFloat(resampled);
+      resampled = applyFadeOut(resampled, options.targetRate, options.fadeMs);
+      const data8 = floatToU8(resampled);
+      return {
+        sourceRate: audioBuffer.sampleRate,
+        targetRate: options.targetRate,
+        mono: resampled,
+        data8,
+        durationMs: Math.round((data8.length / options.targetRate) * 1000),
+      };
+    }
+
+    function updateSampleUI(id) {
+      const def = SAMPLE_DEFS.find(s => s.id === id);
+      const sample = state.samples[id];
+      const badge = document.getElementById(`badge-${id}`);
+      const meta = document.getElementById(`meta-${id}`);
+      const canvas = document.getElementById(`canvas-${id}`);
+      const play = document.getElementById(`play-${id}`);
+      const reprocess = document.getElementById(`reprocess-${id}`);
+      const clear = document.getElementById(`clear-${id}`);
+
+      if (!sample) {
+        badge.textContent = 'Не загружен';
+        meta.textContent = 'Нет данных';
+        play.disabled = true;
+        reprocess.disabled = true;
+        clear.disabled = true;
+        drawPlaceholder(canvas, def.label);
+        return;
+      }
+
+      const { file, processed, decoded } = sample;
+      badge.textContent = `${processed.data8.length} байт`;
+      badge.className = 'badge ok';
+      meta.innerHTML = `Файл: <strong>${file.name}</strong> · src ${decoded.sampleRate} Hz → ${processed.targetRate} Hz · ${processed.durationMs} ms · mono · 8-bit unsigned`;
+      play.disabled = false;
+      reprocess.disabled = false;
+      clear.disabled = false;
+      drawWaveform(canvas, processed.data8);
+    }
+
+    function clearSample(id) {
+      state.samples[id] = null;
+      updateSampleUI(id);
+      refreshSummary();
+    }
+
+    function reprocess(id) {
+      const s = state.samples[id];
+      if (!s?.decoded) return;
+      s.processed = processAudioBuffer(s.decoded, {
+        targetRate: state.targetRate,
+        trimThreshold: state.trimThreshold,
+        fadeMs: state.fadeMs,
+        normalize: state.normalize,
+      });
+      updateSampleUI(id);
+      refreshSummary();
+    }
+
+    function reprocessAll() {
+      for (const def of SAMPLE_DEFS) if (state.samples[def.id]?.decoded) reprocess(def.id);
+    }
+
+    async function previewSample(id) {
+      const s = state.samples[id]?.processed;
+      if (!s) return;
+      const ctx = await getAudioContext();
+      const buffer = ctx.createBuffer(1, s.mono.length, s.targetRate);
+      buffer.copyToChannel(s.mono, 0);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.connect(ctx.destination);
+      src.start();
+    }
+
+    function buildSineTable() {
+      const len = 256;
+      const arr = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        const v = Math.sin((i / len) * Math.PI * 2);
+        arr[i] = Math.round(v * 127 + 127);
+      }
+      return arr;
+    }
+
+    function wrapArray(name, data) {
+      const lines = [];
+      const perLine = 24;
+      for (let i = 0; i < data.length; i += perLine) {
+        lines.push('  ' + Array.from(data.slice(i, i + perLine)).join(', '));
+      }
+      return `const unsigned char ${name}[] PROGMEM = {\n${lines.join(',\n')}\n};\n`;
+    }
+
+    function generateHeader() {
+      const missing = SAMPLE_DEFS.filter(def => !state.samples[def.id]?.processed);
+      if (missing.length) {
+        alert('Сначала загрузи все 4 сэмпла.');
+        return;
+      }
+
+      const kick = state.samples.kick.processed.data8;
+      const snare = state.samples.snare.processed.data8;
+      const hat = state.samples.hat.processed.data8;
+      const bass = state.samples.bass.processed.data8;
+      const sine = buildSineTable();
+
+      const text = `#ifndef SAMPLES_H\n#define SAMPLES_H\n\n#include <avr/pgmspace.h>\n\n// Generated by Samplified Sample Tool\n// target sample rate: ${state.targetRate} Hz\n// trim threshold: ${(state.trimThreshold * 100).toFixed(1)}%\n// fade out: ${state.fadeMs} ms\n// normalize: ${state.normalize ? 'on' : 'off'}\n\n${wrapArray('kick_table', kick)}\nconst unsigned int kick_length = ${kick.length};\n\n${wrapArray('snare_table', snare)}\nconst unsigned int snare_length = ${snare.length};\n\n${wrapArray('tick_table', hat)}\nconst unsigned int tick_length = ${hat.length};\n\n${wrapArray('bass_table', bass)}\nconst unsigned int bass_length = ${bass.length};\n\n${wrapArray('sine_table', sine)}\n\n#endif\n`;
+
+      state.outputText = text;
+      els.output.textContent = text;
+      els.downloadBtn.disabled = false;
+      els.copyBtn.disabled = false;
+    }
+
+    function downloadHeader() {
+      if (!state.outputText) return;
+      const blob = new Blob([state.outputText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'samples.h';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    async function copyHeader() {
+      if (!state.outputText) return;
+      try {
+        await navigator.clipboard.writeText(state.outputText);
+        const prev = els.copyBtn.textContent;
+        els.copyBtn.textContent = 'Скопировано';
+        setTimeout(() => els.copyBtn.textContent = prev, 1200);
+      } catch {
+        alert('Не удалось скопировать в буфер обмена.');
+      }
+    }
+
+    function refreshSummary() {
+      let total = 0;
+      let loaded = 0;
+      for (const def of SAMPLE_DEFS) {
+        const s = state.samples[def.id]?.processed;
+        if (s) {
+          loaded++;
+          total += s.data8.length;
+        }
+      }
+      els.totalBytes.textContent = total.toLocaleString('ru-RU');
+      els.loadedCount.textContent = `${loaded} / 4`;
+      els.flashEstimate.textContent = fmtBytes(total + 256);
+      els.generateBtn.disabled = loaded < 4;
+      if (loaded < 4) {
+        els.downloadBtn.disabled = true;
+        els.copyBtn.disabled = true;
+      }
+    }
+
+    function syncLabels() {
+      els.sampleRateLabel.textContent = `${state.targetRate} Hz`;
+      els.trimLabel.textContent = `${(state.trimThreshold * 100).toFixed(1)}%`;
+      els.fadeLabel.textContent = `${state.fadeMs} ms`;
+      els.normalizeLabel.textContent = state.normalize ? 'Вкл.' : 'Выкл.';
+    }
+
+    function hookControls() {
+      els.targetRate.addEventListener('input', () => {
+        state.targetRate = Number(els.targetRate.value);
+        syncLabels();
+      });
+      els.targetRate.addEventListener('change', reprocessAll);
+
+      els.trimThreshold.addEventListener('input', () => {
+        state.trimThreshold = Number(els.trimThreshold.value) / 100;
+        syncLabels();
+      });
+      els.trimThreshold.addEventListener('change', reprocessAll);
+
+      els.fadeMs.addEventListener('input', () => {
+        state.fadeMs = Number(els.fadeMs.value);
+        syncLabels();
+      });
+      els.fadeMs.addEventListener('change', reprocessAll);
+
+      els.normalizeMode.addEventListener('change', () => {
+        state.normalize = els.normalizeMode.value === 'on';
+        syncLabels();
+        reprocessAll();
+      });
+
+      els.generateBtn.addEventListener('click', generateHeader);
+      els.downloadBtn.addEventListener('click', downloadHeader);
+      els.copyBtn.addEventListener('click', copyHeader);
+      els.loadDemoBtn.addEventListener('click', loadDemoData);
+    }
+
+    function makeSyntheticSample(kind, length, rate) {
+      const out = new Float32Array(length);
+      if (kind === 'kick') {
+        for (let i = 0; i < length; i++) {
+          const t = i / rate;
+          const env = Math.exp(-t * 12);
+          const f = 140 * Math.exp(-t * 16) + 42;
+          out[i] = Math.sin(2 * Math.PI * f * t) * env;
+        }
+      } else if (kind === 'snare') {
+        for (let i = 0; i < length; i++) {
+          const t = i / rate;
+          const env = Math.exp(-t * 18);
+          out[i] = ((Math.random() * 2 - 1) * 0.8 + Math.sin(2 * Math.PI * 220 * t) * 0.2) * env;
+        }
+      } else if (kind === 'hat') {
+        for (let i = 0; i < length; i++) {
+          const t = i / rate;
+          const env = Math.exp(-t * 65);
+          out[i] = (Math.random() * 2 - 1) * env;
+        }
+      } else if (kind === 'bass') {
+        for (let i = 0; i < length; i++) {
+          const t = i / rate;
+          const env = Math.exp(-t * 6);
+          out[i] = (Math.sin(2 * Math.PI * 55 * t) + 0.25 * Math.sin(2 * Math.PI * 110 * t)) * env;
+        }
+      }
+      return out;
+    }
+
+    function loadDemoData() {
+      const sr = state.targetRate;
+      const synthetic = {
+        kick: makeSyntheticSample('kick', Math.round(sr * 0.34), sr),
+        snare: makeSyntheticSample('snare', Math.round(sr * 0.22), sr),
+        hat: makeSyntheticSample('hat', Math.round(sr * 0.08), sr),
+        bass: makeSyntheticSample('bass', Math.round(sr * 0.42), sr),
+      };
+
+      for (const def of SAMPLE_DEFS) {
+        const mono = synthetic[def.id];
+        const norm = state.normalize ? normalizeFloat(mono) : mono;
+        const faded = applyFadeOut(norm, sr, state.fadeMs);
+        state.samples[def.id] = {
+          file: new File([], `demo_${def.id}.wav`),
+          decoded: { sampleRate: sr },
+          processed: {
+            sourceRate: sr,
+            targetRate: sr,
+            mono: faded,
+            data8: floatToU8(faded),
+            durationMs: Math.round((faded.length / sr) * 1000),
+          }
+        };
+        updateSampleUI(def.id);
+      }
+      refreshSummary();
+    }
+
+    function init() {
+      SAMPLE_DEFS.forEach(createSampleCard);
+      hookControls();
+      syncLabels();
+      refreshSummary();
+    }
+
+    init();
+  </script>
+</body>
+</html>
